@@ -150,7 +150,7 @@
 							</div>	
 							<div class="h-100p text-center pt-20 pb-20 pl-20 pr-20 bg-white bs">
                             	<div class="contact-form">
-                                   <form action="upload.php" role="form" class="frmNew" id="frmNew" method="post" enctype="multipart/form-data" novalidate>
+                                   <form role="form" class="frmNew" id="frmNew" method="post" enctype="multipart/form-data" novalidate>
 										<div class="form-group">
 											<div class="row">
 												<div class="col-md-6 col-sm-6 col-xs-6">
@@ -164,22 +164,21 @@
 										<div class="form-group">
 											<div class="row">
 												<div class="col-md-6 col-sm-6 col-xs-6">
-													<input type="text" class="form-control" name="subject" placeholder="Título">
+													<input type="text" class="form-control" name="subject" placeholder="Título" id="subjectTitle">
 												</div>
 												<div class="col-md-6 col-sm-6 col-xs-6">
-													<input type="text" class="form-control" name="comments" placeholder="Comentário">
+													<input type="text" class="form-control" name="comments" placeholder="Conteúdo" id="subjectComment">
 												</div>
 											</div>
 										</div>
 										<div class="form-group">
-										<input type="file" value="Upload" class="form-control" name="file" placeholder="Upload Photo">
+										<input type="file" id="files" value="Upload" accept="image/jpeg, image/jpg" class="form-control" name="file" placeholder="Upload Photo">
 										</div>
 										<div class="form-group">
-											<button type="submit" class="button-new">		
-											  <span download="<?php echo $files[$a] ?>" href="uploads/<?php echo $files[$a] ?>" class="label" data-attr="Baixar">Baixar</span>
-											</button>
+											<a class="button-new" id="download-file" download="undefined.jpeg" href="">		
+											  <span class="label" data-attr="Baixar">Baixar</span>
+											</a>
 										</div>
-
 									</form>
                                 </div>
                             </div>
@@ -234,9 +233,6 @@
     </div>
     <!-- start main wrapper area -->
     <!-- All jQuery -->
-     	<script async defer src="https://accounts.google.com/gsi/client"></script>
-	<div id="g_id_onload" data-client_id="476133176736-ijmc4dnjaceirmt37gnu90aena45o356.apps.googleusercontent.com"  data-login_uri="https://www.montdigital.com/geo-tagging"></div>
-	<div style="clear:both;" id="userinfo"></div>
 	    <script src="https://www.montdigital.com/js/vendor/jquery-1.12.0.min.js"></script>
 	<script>
     var header 		= document.getElementById("myHeader");
@@ -275,15 +271,82 @@
 	<link rel="stylesheet" href="https://www.montdigital.com/flyers/flag/intlTelInput.css">
 	<script src="https://www.montdigital.com/flyers/flag/intlTelInput.js" defer></script> 
     <script src="https://www.montdigital.com/js/contact-us.js" defer></script>
-	<!--<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1" async defer></script>
-	<df-messenger
-	  intent="WELCOME"
-	  chat-title="Mont-Digital"
-	  agent-id="49f01a32-ead2-41d1-907c-2bacf2ba9295"
-	  language-code="en"
-	></df-messenger>-->
+
 	<script type="text/javascript" async defer>adroll_adv_id = "JVQ4NI7QHNCPRNYRAX3X6A"; adroll_pix_id = "63BZAPZITRC7FGW7TOK35U"; (function () { var _onload = function(){ if (document.readyState && !/loaded|complete/.test(document.readyState)){setTimeout(_onload, 10);return} if (!window.__adroll_loaded){__adroll_loaded=true;setTimeout(_onload, 50);return} var scr = document.createElement("script"); var host = (("https:" == document.location.protocol) ? "https://s.adroll.com" : "http://a.adroll.com"); scr.setAttribute('async', 'true'); scr.type = "text/javascript"; scr.src = host + "/j/roundtrip.js"; ((document.getElementsByTagName('head') || [null])[0] || document.getElementsByTagName('script')[0].parentNode).appendChild(scr); }; if (window.addEventListener) {window.addEventListener('load', _onload, false);} else {window.attachEvent('onload', _onload)} }()); </script> 
 	
+	<script src="https://cdn.jsdelivr.net/npm/piexifjs@1.0.6/piexif.min.js"></script>
+
+	<script>
+
+		const inputElement = document.getElementById('files');
+		const downloadFile = document.getElementById('download-file');
+
+		inputElement.addEventListener('change', handleFileSelect, false);
+		function handleFileSelect(evt) {
+		let title = document.getElementById('subjectTitle').value;
+		let comment = document.getElementById('subjectComment').value;
+		let lat = Number(document.getElementById('latitude').value);
+		let lng = Number(document.getElementById('longitude').value);
+
+		console.log(title);
+		console.log(comment);
+		console.log(lat);
+		console.log(lng);
+
+		var file = evt.target.files[0];
+		const tets = [
+  		116, 0, 101, 0,
+  		116, 0, 115, 0
+	];
+
+		function getCharCodes(s){
+    		let charCodeArr = [];
+    
+    		for(let i = 0; i < s.length; i++){
+        		let code = s.charCodeAt(i);
+        		charCodeArr.push(code);
+				charCodeArr.push(0);
+    		}
+    		return charCodeArr;
+		}
+
+		const titleReturn = getCharCodes(title);
+		const commentReturn = getCharCodes(comment);
+
+
+
+		var zeroth = {};
+		var exif = {};
+		var gps = {};
+		//exif[piexif.ExifIFD.UserComment] = "some desc";
+		zeroth[piexif.ImageIFD.XPTitle] = titleReturn;
+		zeroth[piexif.ImageIFD.XPComment] = commentReturn;
+		// zeroth[piexif.ImageIFD.XPAuthor]  = tets;
+		//zeroth[207] = "tets"
+
+		gps[piexif.GPSIFD.GPSLatitudeRef] = lat < 0 ? 'S' : 'N';
+		gps[piexif.GPSIFD.GPSLatitude] = piexif.GPSHelper.degToDmsRational(lat);
+		gps[piexif.GPSIFD.GPSLongitudeRef] = lng < 0 ? 'W' : 'E';
+		gps[piexif.GPSIFD.GPSLongitude] = piexif.GPSHelper.degToDmsRational(lng);
+		
+
+		var exifObj = {"0th": zeroth, "Exif":exif, "GPS":gps};
+		var exifStr = piexif.dump(exifObj);
+		var reader = new FileReader();
+		reader.onload = function(e) {
+    	const inserted = piexif.insert(exifStr, e.target.result);
+    	console.log('file', e.target);
+    	downloadFile.href = inserted;
+    	const download = evt.target.value.split(/\\/).splice(-1, 1)[0];
+    	console.log(download);
+    	downloadFile.download = download;
+	};
+		reader.readAsDataURL(file);
+	}
+	</script>
+
+
+
 </body>
 </html><script src="https://www.montdigital.com/js/plugin/sticky-sidebar/theia-sticky-sidebar.js" type="text/javascript" defer></script>
 <script src="https://www.montdigital.com/js/sticky-side-bar.js" type="text/javascript" defer></script>
@@ -377,6 +440,8 @@ function initMap() {
 	  infowindow.open(map, marker);
 		$('#latitude').val(latitude);
 		$('#longitude').val(longitude);
+
+	
 	}); // Sets a listener on a radio button to change the filter type on Places
 	// Autocomplete.
 
@@ -391,6 +456,8 @@ function initMap() {
 		infowindow.open(map, marker);
 		$('#latitude').val(latitude);
 		$('#longitude').val(longitude);
+	
+	
 	}); 
 	function geocodePosition(pos) {
 	  geocoder.geocode({
